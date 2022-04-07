@@ -10,7 +10,7 @@ Based on [AnimAssist](https://github.com/lmcintyre/AnimAssist), but much more sc
 ## Usage
 > Note that this workflow does not support `.pap` files which contain multiple animations at the moment. Also a proper Blender addon is coming soon (tm)
 
-First, find the `.pap` file of an animation that you want to replace (using a tool like [FFXIVExplorer](https://github.com/goaaats/ffxiv-explorer-fork/tree/index2), as well as the corresponding `.sklb` skeleton file. For example:
+First, find the `.pap` file of an animation that you want to replace (using a tool like [FFXIVExplorer](https://github.com/goaaats/ffxiv-explorer-fork/tree/index2)), as well as the corresponding `.sklb` skeleton file. For example:
 
 ```
 chara/human/c1101/skeleton/base/b0001/skl_c1101b0001.sklb
@@ -20,7 +20,7 @@ Make sure that the ids of the skeleton and the animation match up (in this case 
 
 Export the existing skeleton and animation files as a `.hkx` using:
 ```
-.\anim.exe -s skl_c1101b0001.sklb -p joy.pap -o combined.hkx
+.\anim.exe extract -s skl_c1101b0001.sklb -p joy.pap -o combined.hkx
 ```
 Then run `skeldump`:
 ```
