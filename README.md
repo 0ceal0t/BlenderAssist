@@ -5,9 +5,11 @@ Based on [AnimAssist](https://github.com/lmcintyre/AnimAssist), but much more sc
 ## Requirements
 - [VC++2012 32-bit Redist](https://www.microsoft.com/en-us/download/details.aspx?id=30679#) (`VSU_4\vcredist_x86.exe`)
 - [Blender](https://www.blender.org/)
-- A way to replace an existing `.pap` file like Textools, Penumbra, or VFXEditor 
+- A way to replace an existing `.pap` files like Textools, Penumbra, or VFXEditor 
 
 ## Usage
+> Note that this workflow does not support `.pap` files which contain multiple animations at the moment. Also a proper Blender addon is coming soon (tm)
+
 First, find the `.pap` file of an animation that you want to replace (using a tool like [FFXIVExplorer](https://github.com/goaaats/ffxiv-explorer-fork/tree/index2), as well as the corresponding `.sklb` skeleton file. For example:
 
 ```
@@ -16,7 +18,34 @@ chara/human/c1101/animation/a0001/bt_common/emote/joy.pap
 ```
 Make sure that the ids of the skeleton and the animation match up (in this case `c1101`), and extract both of these files using Textools, FFXIVExplorer, etc.
 
-## Custom Animations in Blender
+Export the existing skeleton and animation files as a `.hkx` using:
+```
+.\anim.exe -s skl_c1101b0001.sklb -p joy.pap -o combined.hkx
+```
+Then run `skeldump`:
+```
+.\skeldump.exe combined.hkx bones_dump.txt
+```
+From there, you can start making an animation in Blender as you normally would. Be careful when imporing a skeleton into Blender that it matches the one you extracted earlier. There are several tools to convert skeletons into `fbx` or `obj`, such as Textools' Full Model Viewer or the dedicated PAP Converter found in the Textools Discord.
+
+Once you are ready to export the animation, load the `export_havok.py` script into Blender, and change the following lines:
+```
+out_file = 'D:\\FFXIV\\TOOLS\\AnimationModding\\animout.bin'
+skel_dump = 'D:\\FFXIV\\TOOLS\\AnimationModding\\bones_dump.txt'
+endFrame = 616
+startFrame = 500
+```
+Then, select the armature you are exporting, and click the "Run" button
+![image](https://user-images.githubusercontent.com/18051158/162326153-8532e798-fa05-4861-907c-8e4c84da62b2.png)
+
+Finally, run
+```
+.\bintoxml.exe .\animout.bin .\converted.xml
+.\anim.exe pack -s .\skl_c1101b0001.sklb -p .\joy.pap -a .\converted.xml -o final_out.pap
+```
+And import `final_out.pap` using your modding tool of choice.
+
+## Porting Animations
 
 ## TMB and PAP Files
 
