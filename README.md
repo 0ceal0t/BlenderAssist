@@ -36,6 +36,7 @@ endFrame = 616
 startFrame = 500
 ```
 Then, select the armature you are exporting, and click the "Run" button
+
 ![image](https://user-images.githubusercontent.com/18051158/162326153-8532e798-fa05-4861-907c-8e4c84da62b2.png)
 
 Finally, run
@@ -49,9 +50,11 @@ https://user-images.githubusercontent.com/18051158/162326495-ab9ba1c2-fc88-4068-
 
 ## Porting Animations
 When importing animations from MMD, other games, etc. it's generally a good idea to use a [bone remapping tool](https://github.com/Mwni/blender-animation-retargeting). A small caveat for this specific ones is that it will not work unless just adjust the "Rest alignment" of one of the bones you have mapped. For example, my mapping is:
+
 ![image](https://user-images.githubusercontent.com/18051158/162326747-87837006-276d-4436-ba15-6abe2b23652f.png)
 
 So when setting the "Rest alignment", I just wiggled `n_hara` slightly. Also make sure to resize the animation source armature so that is rougly the same size as your target:
+
 ![image](https://user-images.githubusercontent.com/18051158/162326875-74f1c72d-999c-4cd8-a882-4d382ec65c92.png)
 
 ## TMB and PAP Files
