@@ -60,66 +60,6 @@ class Transform(object):
         write_vector4_raw(file, q)
         write_vector4_raw(file, s)
 
-def get_matrixes(obj):
-    out_local_matrix = {}
-
-    def rec(pbone, parent_matrix):
-        matrix = pbone.matrix
-        m = None
-        if pbone.parent:
-            out_matrix = pbone.bone.convert_local_to_pose(
-                matrix,
-                pbone.bone.matrix_local, # relative to armature
-                parent_matrix=parent_matrix,
-                parent_matrix_local=pbone.parent.bone.matrix_local,
-                invert=True
-            )
-
-            m = pbone.bone.parent.matrix_local.inverted() @ pbone.bone.matrix_local
-            m = m @ out_matrix
-        else:
-            out_matrix = pbone.bone.convert_local_to_pose(
-                matrix,
-                pbone.bone.matrix_local,
-                invert=True
-            )
-
-            m = pbone.bone.matrix_local @ out_matrix
-
-        out_local_matrix[pbone.name] = m
-
-        # Compute the updated pose matrix from local and new parent matrix
-        new_parent_matrix = None
-        if pbone.parent:
-            new_parent_matrix = pbone.bone.convert_local_to_pose(
-                pbone.matrix_basis,
-                pbone.bone.matrix_local,
-                parent_matrix=parent_matrix,
-                parent_matrix_local=pbone.parent.bone.matrix_local,
-            )
-        else:
-            new_parent_matrix = pbone.bone.convert_local_to_pose(
-                pbone.matrix_basis,
-                pbone.bone.matrix_local,
-            )
-
-        if "n_hara" in pbone.name:
-            print(pbone.matrix_basis)
-            print(matrix)
-            print(out_local_matrix[pbone.name])
-            print("--------------")
-
-        # Recursively process children, passing the new matrix through
-        for child in pbone.children:
-            rec(child, new_parent_matrix)
-
-    # Scan all bone trees from their roots
-    for pbone in obj.pose.bones:
-        if not pbone.parent:
-            rec(pbone, None)
-
-    return out_local_matrix
-
 # ================================
 
 valid_bones = []
@@ -161,13 +101,7 @@ for current_frame in range(numOriginalFrames + 1):
         if pose_bone.name not in tracks:
             continue
         bone = pose_bone.bone
-
-        #if bone.parent:
-        #    m = bone.parent.matrix_local.inverted() @ bone.matrix_local
-        #    m = m @ pose_bone.matrix_basis
-        #else:
-        #    m = bone.matrix_local @ pose_bone.matrix_basis
-
+        
         if pose_bone.parent:
             m = pose_bone.parent.matrix.inverted() @ pose_bone.matrix
         else:
