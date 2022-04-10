@@ -1,6 +1,6 @@
 # BlenderAssist
 
-Based on [AnimAssist](https://github.com/lmcintyre/AnimAssist), but much more scuffed.
+An add-on to import FFXIV animations into Blender and export custom ones for use in-game. Based on [AnimAssist](https://github.com/lmcintyre/AnimAssist), but much more scuffed.
 
 ## Requirements
 - [VC++2012 32-bit Redist](https://www.microsoft.com/en-us/download/details.aspx?id=30679#) (`VSU_4\vcredist_x86.exe`)
