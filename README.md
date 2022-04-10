@@ -7,8 +7,12 @@ Based on [AnimAssist](https://github.com/lmcintyre/AnimAssist), but much more sc
 - [Blender](https://www.blender.org/)
 - A way to replace an existing `.pap` files like Textools, Penumbra, or VFXEditor 
 
+## Installation
+Download the addon from the [releases](https://github.com/0ceal0t/BlenderAssist/releases). Go to `Edit > Preferences > Add-ons`, press "Install" and select the entire `.zip` file. Make sure to enable the add-on as well.
+
+![image](https://user-images.githubusercontent.com/18051158/162598790-56386e08-6182-4691-90b3-ebfc0f88cf9f.png)
+
 ## Usage
-> Note that this workflow does not support `.pap` files which contain multiple animations at the moment. Also a proper Blender addon is coming soon (tm)
 
 First, find the `.pap` file of an animation that you want to replace (using a tool like [FFXIVExplorer](https://github.com/goaaats/ffxiv-explorer-fork/tree/index2)), as well as the corresponding `.sklb` skeleton file. For example:
 
@@ -18,33 +22,13 @@ chara/human/c1101/animation/a0001/bt_common/emote/joy.pap
 ```
 Make sure that the ids of the skeleton and the animation match up (in this case `c1101`), and extract both of these files using Textools, FFXIVExplorer, etc.
 
-Export the existing skeleton and animation files as a `.hkx` using:
-```
-.\anim.exe extract -s skl_c1101b0001.sklb -p joy.pap -o combined.hkx
-```
-Then run `skeldump`:
-```
-.\skeldump.exe combined.hkx bones_dump.txt
-```
-From there, you can start making an animation in Blender as you normally would. Be careful when imporing a skeleton into Blender that it matches the one you extracted earlier. There are several tools to convert skeletons into `fbx` or `obj`, such as Textools' Full Model Viewer or the dedicated PAP Converter found in the Textools Discord.
+Once you have an animation you want to export, select the armature and open the "BlenderAssist" menu in 3D view (default keybind is "N"), or press the left-facing arrow at the top-right of the 3D view.
 
-Once you are ready to export the animation, load the `export_havok.py` script into Blender, and change the following lines:
-```
-out_file = 'D:\\FFXIV\\TOOLS\\AnimationModding\\animout.bin'
-skel_dump = 'D:\\FFXIV\\TOOLS\\AnimationModding\\bones_dump.txt'
-endFrame = 616
-startFrame = 500
-```
-Then, select the armature you are exporting, and click the "Run" button
+Configure the parameters to your liking, **making sure to select the original .pap and .sklb files**. Make sure the animation index also matches that of the animation you want to replace. Most `.pap` files only have a single animation, so leaving it at `0` is fine, but make sure to double-check.
 
-![image](https://user-images.githubusercontent.com/18051158/162326153-8532e798-fa05-4861-907c-8e4c84da62b2.png)
+![image](https://user-images.githubusercontent.com/18051158/162598885-6a85dc66-ac38-4f3b-8501-ab7abc2f5ed3.png)
 
-Finally, run
-```
-.\bintoxml.exe .\animout.bin .\converted.xml
-.\anim.exe pack -s .\skl_c1101b0001.sklb -p .\joy.pap -a .\converted.xml -o final_out.pap
-```
-And import `final_out.pap` using your modding tool of choice.
+And import the outputed `.pap` using your modding tool of choice.
 
 https://user-images.githubusercontent.com/18051158/162326495-ab9ba1c2-fc88-4068-a53d-bf8dd50c83e2.mp4
 
