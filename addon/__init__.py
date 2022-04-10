@@ -4,7 +4,7 @@ bl_info = {
 	"description" : "Export custom animations for FFXIV",
 	"version": (1, 0, 0),
 	"blender" : (2, 80, 0),
-	"location" : "3D View > Tools (Right Side) > Retarget",
+	"location" : "3D View > Tools (Right Side) > BlenderAssist",
 	"warning" : "",
 	"category" : "Animation",
 	"wiki_url": 'https://github.com/0ceal0t/BlenderAssist',
