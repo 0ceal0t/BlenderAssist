@@ -1,3 +1,0 @@
-[submodule "binToXML/3rd_party/HavokLib"]
-	path = binToXML/3rd_party/HavokLib
-	url = https://github.com/PredatorCZ/HavokLib.git
