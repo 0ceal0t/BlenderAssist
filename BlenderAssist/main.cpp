@@ -14,7 +14,7 @@
 
 #include "Common/Base/System/Init/PlatformInit.cxx"
 #include "pack.h"
-
+#include "extract.h"
 
 static void HK_CALL errorReport(const char* msg, void* userContext) {
     using namespace std;
@@ -55,13 +55,13 @@ int main(int argc, const char** argv) {
 
     std::string operation(convert_from_wstring(nargv[1]).c_str());
 
-    // blenderassist.exe pack anim_idx .bin skl.hkx anim.hkx out.hkx
+    // blenderassist.exe pack anim_idx .bin sklb pap out.pap
     if (operation.compare("pack") == 0) {
         hkStringBuf anim_idx; // animation index
         hkStringBuf bin_in; // .bin from blender
         hkStringBuf skl_in; // original skeleton
         hkStringBuf anim_in; // original animation
-        hkStringBuf anim_out; // havok animation out
+        hkStringBuf anim_out; // pap animation out
 
         anim_idx = convert_from_wstring(nargv[2]).c_str();
         bin_in = convert_from_wstring(nargv[3]).c_str();
@@ -70,6 +70,19 @@ int main(int argc, const char** argv) {
         anim_out = convert_from_wstring(nargv[6]).c_str();
 
         return pack(anim_idx, bin_in, skl_in, anim_in, anim_out);
+    }
+    else if (operation.compare("extract") == 0) {
+        hkStringBuf skl_in_sklb;
+        hkStringBuf anim_in_pap;
+        hkStringBuf sklb_out;
+        hkStringBuf pap_out;
+
+        skl_in_sklb = convert_from_wstring(nargv[2]).c_str();
+        anim_in_pap = convert_from_wstring(nargv[3]).c_str();
+        sklb_out = convert_from_wstring(nargv[4]).c_str();
+        pap_out = convert_from_wstring(nargv[5]).c_str();
+
+        return extract(skl_in_sklb, anim_in_pap, sklb_out, pap_out);
     }
 
     printf("No operation given\n");

@@ -182,3 +182,22 @@ void PapFile::replaceHavok(hkStringBuf filename) {
 void deleteFile(hkStringBuf path) {
     std::remove(path);
 }
+
+std::string dirnameOf(const std::string& fname) {
+    size_t pos = fname.find_last_of("\\/");
+    return (std::string::npos == pos)
+           ? ""
+           : fname.substr(0, pos);
+}
+
+hkStringBuf concat(std::string baseDirStr, std::string fileName) {
+    hkStringBuf baseDir(baseDirStr.c_str());
+    if (baseDir.getLength() == 0) {
+        baseDir.append(fileName.c_str());
+        return baseDir;
+    }
+
+    baseDir.append("\\");
+    baseDir.append(fileName.c_str());
+    return baseDir;
+}

@@ -39,5 +39,7 @@ public:
 };
 
 void deleteFile(hkStringBuf path);
+std::string dirnameOf(const std::string& fname);
+hkStringBuf concat(std::string baseDirStr, std::string fileName);
 
 #endif //BLENDERASSIST_FILEHELPER_H

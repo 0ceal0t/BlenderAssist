@@ -180,25 +180,6 @@ int packHavok(const hkStringBuf anim_idx_str, const hkStringBuf bin_in, const hk
     }
 }
 
-std::string dirnameOf(const std::string& fname) {
-    size_t pos = fname.find_last_of("\\/");
-    return (std::string::npos == pos)
-           ? ""
-           : fname.substr(0, pos);
-}
-
-hkStringBuf concat(std::string baseDirStr, std::string fileName) {
-    hkStringBuf baseDir(baseDirStr.c_str());
-    if (baseDir.getLength() == 0) {
-        baseDir.append(fileName.c_str());
-        return baseDir;
-    }
-
-    baseDir.append("\\");
-    baseDir.append(fileName.c_str());
-    return baseDir;
-}
-
 int pack(const hkStringBuf anim_idx_str, const hkStringBuf bin_in, const hkStringBuf skl_in_sklb, const hkStringBuf anim_in_pap, const hkStringBuf anim_out_pap) {
     PapFile papFile;
     papFile.read(anim_in_pap);
