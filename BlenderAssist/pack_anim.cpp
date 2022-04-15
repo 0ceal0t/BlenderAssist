@@ -1,56 +1,14 @@
 #include "pack_anim.h"
-#include "filehelper.h"
+#include "helper.h"
 #include <iostream>
 #include <cstdio>
 #include <vector>
 #include <string>
 
-#include <Common/Base/Memory/System/Util/hkMemoryInitUtil.h>
-#include <Common/Base/System/Io/IStream/hkIStream.h>
-#include <Common/Base/Reflection/Registry/hkDefaultClassNameRegistry.h>
-#include <Common/Serialize/Util/hkRootLevelContainer.h>
 #include <Common/Serialize/Util/hkLoader.h>
 #include <Common/Serialize/Util/hkSerializeUtil.h>
-#include <Common/Serialize/Version/hkVersionPatchManager.h>
-#include <Common/Base/Reflection/hkInternalClassMember.h>
-
-#include <Animation/Animation/hkaAnimationContainer.h>
 #include <Animation/Animation/Animation/Interleaved/hkaInterleavedUncompressedAnimation.h>
 #include <Animation/Animation/Animation/SplineCompressed/hkaSplineCompressedAnimation.h>
-
-void read(hkIstream& stream, hkQsTransform& transform) {
-    hkVector4 translation;
-    hkQuaternion rotation;
-    hkVector4 scale;
-
-    stream.read(&translation, sizeof(hkVector4));
-    stream.read(&rotation.m_vec, sizeof(hkVector4));
-    stream.read(&scale, sizeof(hkVector4));
-
-    transform.setTranslation(translation);
-    transform.setRotation(rotation);
-    transform.setScale(scale);
-}
-
-int getBoneIdx(std::string trackName, hkRefPtr<hkaSkeleton> skl) {
-    for(int boneIdx = 0; boneIdx < skl->m_bones.getSize(); boneIdx++) {
-        auto boneName = skl->m_bones[boneIdx].m_name.cString();
-        if (trackName == boneName) {
-            return boneIdx;
-        }
-    }
-    return -1;
-}
-
-bool getBound(int boneIdx, hkRefPtr<hkaAnimationBinding> binding) {
-    for(int i = 0; i < binding->m_transformTrackToBoneIndices.getSize(); i++) {
-        if(binding->m_transformTrackToBoneIndices[i] == boneIdx) {
-            return true;
-        }
-    }
-    return false;
-}
-
 
 void read(hkRefPtr<hkaInterleavedUncompressedAnimation> anim, hkRefPtr<hkaAnimationBinding> binding, hkRefPtr<hkaSkeleton> skl, hkIstream stream, bool checkIfOriginalBound) {
     int numOriginalFrames;

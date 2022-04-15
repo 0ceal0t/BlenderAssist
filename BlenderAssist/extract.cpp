@@ -1,5 +1,5 @@
 #include "extract.h"
-#include "filehelper.h"
+#include "helper.h"
 
 #include <Common/Base/Memory/System/Util/hkMemoryInitUtil.h>
 #include <Common/Base/Reflection/Registry/hkDefaultClassNameRegistry.h>

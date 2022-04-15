@@ -32,7 +32,7 @@ else()
 endif()
 
 add_definitions(-DUNICODE -D_UNICODE)
-add_executable(blenderassist main.cpp pack_anim.cpp pack_anim.h filehelper.cpp filehelper.h extract.cpp extract.h pack_skel.cpp pack_skel.h)
+add_executable(blenderassist main.cpp pack_anim.cpp pack_anim.h helper.cpp helper.h extract.cpp extract.h pack_skel.cpp pack_skel.h)
 target_link_libraries(blenderassist ${PROJ_LIBRARIES})
 
 set(CMAKE_CXX_STANDARD 14)

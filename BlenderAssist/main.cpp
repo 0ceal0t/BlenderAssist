@@ -14,6 +14,7 @@
 
 #include "Common/Base/System/Init/PlatformInit.cxx"
 #include "pack_anim.h"
+#include "pack_skel.h"
 #include "extract.h"
 
 static void HK_CALL errorReport(const char* msg, void* userContext) {
@@ -72,6 +73,17 @@ int main(int argc, const char** argv) {
         check_if_bound = convert_from_wstring(nargv[7]).c_str();
 
         return pack_anim(anim_idx, bin_in, skl_in, anim_in, anim_out, check_if_bound);
+    }
+    else if (operation.compare("pack_skel") == 0) {
+        hkStringBuf bin_in;
+        hkStringBuf skl_in;
+        hkStringBuf skl_out;
+
+        bin_in = convert_from_wstring(nargv[2]).c_str();
+        skl_in = convert_from_wstring(nargv[3]).c_str();
+        skl_out = convert_from_wstring(nargv[4]).c_str();
+
+        return pack_skel(bin_in, skl_in, skl_out);
     }
     else if (operation.compare("extract") == 0) {
         hkStringBuf skl_in_sklb;

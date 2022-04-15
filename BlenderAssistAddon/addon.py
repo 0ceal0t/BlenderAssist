@@ -1,102 +1,15 @@
-from numpy import true_divide
 import bpy
 from bpy.props import (StringProperty, PointerProperty, IntProperty, CollectionProperty, BoolProperty)                    
 from bpy.types import (PropertyGroup, Operator)
 
 import os
-from mathutils import Quaternion, Vector
 
-from . import helper
+from . import anim
+from . import skl
 from . import data
 from . import exclude_bones
 
 import subprocess
-
-# ================================
-
-class Transform(object):
-    def __init__(self):
-        self.translation = Vector((0, 0, 0))
-        self.rotation = Quaternion()
-        self.scale = Vector((1, 1, 1))
-
-    def write(self, file):
-        v = self.translation
-        v = (v.x, v.y, v.z, 0)
-        q = self.rotation
-        q = (q.x, q.y, q.z, q.w)
-        s = self.scale
-        s = (s.x, s.y, s.z, 1)
-
-        helper.write_vector4_raw(file, v)
-        helper.write_vector4_raw(file, q)
-        helper.write_vector4_raw(file, s)
-
-# ================================
-
-def export(startFrame, endFrame, out_bin_file):
-    arm_ob = helper.detect_armature()
-    bpy.context.view_layer.objects.active = arm_ob
-    bpy.context.active_object.select_set(state=True)
-
-    numOriginalFrames = endFrame - startFrame
-    duration = float(numOriginalFrames - 1) * 0.0333333333333333
-
-    print("numFrames " + str(numOriginalFrames))
-    print("duration " + str(duration))
-
-    tracks = {}
-    for bone in arm_ob.data.bones:
-        excluded = False
-        for exclude_bone in bpy.context.scene.b_assist_props.exclude_bones:
-            if bone.name == exclude_bone.bone:
-                excluded = True
-                print("Excluded: " + bone.name)
-                break
-
-        if excluded:
-            continue
-                
-        tracks[bone.name] = []
-
-    numTracks = len(tracks)
-    print("numTracks " + str(numTracks))
-
-    current_frame = 0
-    for current_frame in range(numOriginalFrames + 1):
-        #current_time = current_frame * 0.0333333333333333
-        bpy.context.scene.frame_set(current_frame + startFrame)
-
-        for pose_bone in arm_ob.pose.bones:
-            if pose_bone.name not in tracks:
-                continue
-            bone = pose_bone.bone
-            
-            if pose_bone.parent:
-                m = pose_bone.parent.matrix.inverted() @ pose_bone.matrix
-            else:
-                m = pose_bone.matrix
-
-            location, rotation, scale = m.decompose()
-            t = Transform()
-            t.translation = location
-            t.rotation = rotation
-            t.scale = scale
-            tracks[pose_bone.name].append(t)
-
-    with open(out_bin_file, 'wb') as file:
-        helper.write_int(file, numOriginalFrames)
-        helper.write_int(file, numTracks)
-        helper.write_float(file, duration)
-        
-        for track_name in tracks:
-            print("Blender bone : " + track_name)
-            helper.write_cstring(file, track_name)
-            
-        for current_frame in range(numOriginalFrames + 1):
-            for track_name in tracks:
-                transform = tracks[track_name][current_frame]
-                transform.write(file)
 
 # ================================
 
@@ -114,7 +27,8 @@ class BlenderAssistProperties(PropertyGroup):
         maxlen = 1024,
         subtype = "FILE_PATH"
     )
-    # Export
+    
+    # Export Anim
     output_path: StringProperty(
         name = "",
         default = "/tmp/out.pap",
@@ -152,9 +66,24 @@ class BlenderAssistProperties(PropertyGroup):
         name = "Only animate same bones as original animation (do not check for custom skeletons)",
         default = False
     )
+
     exclude_bones: CollectionProperty(type=data.ExcludeBone)
     editing_exclude_bones: BoolProperty(default=False)
     active_exclude_bone: bpy.props.IntProperty()
+
+    # Export Skl
+    input_sklb_skel: StringProperty(
+        name = "",
+        default = "/tmp/original_skeleton.sklb",
+        maxlen = 1024,
+        subtype = "FILE_PATH"
+    )
+    output_path_sklb: StringProperty(
+        name = "",
+        default = "/tmp/out.sklb",
+        maxlen = 1024,
+        subtype = "FILE_PATH"
+    )
 
 # ================================
 
@@ -200,9 +129,33 @@ class BlenderAssistImport(Operator):
 
         return {'FINISHED'}
 
-class BlenderAssistExport(Operator):
-    bl_idname = "b_assist_props.blender_assist_export"
-    bl_label = "Blender Assist Operator"
+class BlenderAssistPanelImport(bpy.types.Panel):
+    bl_idname = "BA_PT_Import"
+    bl_label = "Import"
+    bl_category = "BlenderAssist"
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+
+    def draw(self, context):
+        layout = self.layout
+        scene = context.scene
+        b_assist_props = scene.b_assist_props
+
+        layout.label(text="Animation PAP (leave blank to only import skeleton)")
+        col = layout.column(align=True)
+        col.prop(b_assist_props, "input_pap_import", text="")
+
+        layout.label(text="Skeleton SKLB")
+        col = layout.column(align=True)
+        col.prop(b_assist_props, "input_sklb_import", text="")
+
+        layout.operator(BlenderAssistImport.bl_idname, text="Import", icon="PLAY")   
+
+# ==================================
+
+class BlenderAssistExportAnim(Operator):
+    bl_idname = "b_assist_props.blender_assist_export_anim"
+    bl_label = "Blender Assist Operator Animation"
 
     def execute(self, context):
         scene = context.scene
@@ -219,11 +172,11 @@ class BlenderAssistExport(Operator):
         dirname = os.path.dirname(os.path.abspath(__file__))
         
         basename = os.path.basename(output_pap)
-        basename, extension = os.path.splitext(basename)
+        basename, _ = os.path.splitext(basename)
         anim_bin_file = dirname + '/tmp/' + basename + '.bin'
 
         print("Starting exporting to bin: " + anim_bin_file)
-        export(
+        anim.export(
             state.start_frame,
             state.end_frame,
             anim_bin_file
@@ -236,8 +189,8 @@ class BlenderAssistExport(Operator):
 
         return {'FINISHED'}
         
-class BlenderAssistPanelExport(bpy.types.Panel):
-    bl_idname = "BA_PT_Export"
+class BlenderAssistPanelExportAnim(bpy.types.Panel):
+    bl_idname = "BA_PT_Export_Anim"
     bl_label = "Export Animation"
     bl_category = "BlenderAssist"
     bl_space_type = "VIEW_3D"
@@ -274,19 +227,48 @@ class BlenderAssistPanelExport(bpy.types.Panel):
 
                 layout.prop(state, "check_original_bound")
 
-                layout.label(text="Original Skeleton SKLB")
+                layout.label(text="Skeleton SKLB")
                 col = layout.column(align=True)
                 col.prop(state, "input_sklb", text="")
                 
-                layout.operator(BlenderAssistExport.bl_idname, text="Export as .pap", icon="PLAY")
+                layout.operator(BlenderAssistExportAnim.bl_idname, text="Export as .pap", icon="PLAY")
         else:
             layout.label(text='No armature selected', icon='ERROR')
 
 # ================================
 
-class BlenderAssistPanelImport(bpy.types.Panel):
-    bl_idname = "BA_PT_Import"
-    bl_label = "Import"
+class BlenderAssistExportSkel(Operator):
+    bl_idname = "b_assist_props.blender_assist_export_skel"
+    bl_label = "Blender Assist Operator Skeleton"
+
+    def execute(self, context):
+        scene = context.scene
+        state = scene.b_assist_props
+
+        output_sklb = state.output_path_sklb
+        skl_in = state.input_sklb_skel
+
+        dirname = os.path.dirname(os.path.abspath(__file__))
+        
+        basename = os.path.basename(output_sklb)
+        basename, _ = os.path.splitext(basename)
+        skl_bin_file = dirname + '/tmp/' + basename + '.bin'
+
+        print("Starting exporting to bin: " + skl_bin_file)
+        skl.export(
+            skl_bin_file
+        )
+
+        print("Finished exporting to bin")
+        command = dirname + '/bin/blenderassist.exe'
+        print(command + " " + skl_bin_file + " " + skl_in + " -> " + output_sklb)
+        subprocess.run([command, 'pack_skel', skl_bin_file, skl_in, output_sklb])
+
+        return {'FINISHED'}
+        
+class BlenderAssistPanelExportSkel(bpy.types.Panel):
+    bl_idname = "BA_PT_Export_Skel"
+    bl_label = "Export Skeleton"
     bl_category = "BlenderAssist"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
@@ -294,17 +276,24 @@ class BlenderAssistPanelImport(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         scene = context.scene
-        b_assist_props = scene.b_assist_props
+        state = scene.b_assist_props
 
-        layout.label(text="Animation PAP (leave blank to only import skeleton)")
-        col = layout.column(align=True)
-        col.prop(b_assist_props, "input_pap_import", text="")
+        if context.object != None and context.object.type == 'ARMATURE':
+            split = layout.row().split(factor=0.244)
+            split.column().label(text="Target")
+            split.column().label(text=context.object.name, icon='ARMATURE_DATA')
+        
+            layout.label(text="Output SKLB")
+            col = layout.column(align=True)
+            col.prop(state, "output_path_sklb", text="")
 
-        layout.label(text="Skeleton SKLB")
-        col = layout.column(align=True)
-        col.prop(b_assist_props, "input_sklb_import", text="")
-
-        layout.operator(BlenderAssistImport.bl_idname, text="Import", icon="PLAY")    
+            layout.label(text="Original Skeleton SKLB")
+            col = layout.column(align=True)
+            col.prop(state, "input_sklb_skel", text="")
+            
+            layout.operator(BlenderAssistExportSkel.bl_idname, text="Export as .sklb", icon="PLAY")
+        else:
+            layout.label(text='No armature selected', icon='ERROR') 
 
 # ================================
         
@@ -312,10 +301,15 @@ classes = (
     data.ExcludeBone,
 
     BlenderAssistProperties,
+
     BlenderAssistPanelImport,
-    BlenderAssistPanelExport,
     BlenderAssistImport,
-    BlenderAssistExport,
+
+    BlenderAssistPanelExportAnim,
+    BlenderAssistExportAnim,
+
+    BlenderAssistPanelExportSkel,
+    BlenderAssistExportSkel,
 
     exclude_bones.RT_UL_exclude_bones,
 	exclude_bones.ApplyOperator,
