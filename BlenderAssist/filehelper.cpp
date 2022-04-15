@@ -7,6 +7,13 @@ void writeInt(vector<char>& buffer, int position, int value) {
     }
 }
 
+void writeShort(vector<char>& buffer, int position, short int value) {
+    auto bytes = static_cast<char*>(static_cast<void*>(&value));
+    for(int i = 0; i < sizeof(short int); i++) {
+        buffer[position + i] = bytes[i];
+    }
+}
+
 std::streampos fileSize( const char* filePath ){
     std::streampos fsize = 0;
     std::ifstream file( filePath, std::ios::binary );
@@ -49,7 +56,9 @@ void SklbFile::read(hkStringBuf filename) {
         stream.seekg(4, ios::beg);
         stream.read((char*)&headerVersion, 4);
 
-        if (headerVersion != 0x31333030) { // Header 1
+        headerType2 = (headerVersion == 0x31333030);
+
+        if (!headerType2) { // Header 1
             short int offset2;
 
             // Only 2 bytes for this header format
@@ -87,6 +96,32 @@ void SklbFile::writeHavok(hkStringBuf filename) {
     ofstream stream(filename, ios::binary);
     if (stream.is_open()) {
         writeFromVector(havok, stream, havokSize);
+
+        stream.close();
+    }
+    else {
+        printf("Could not open stream %s\n", filename.cString());
+    }
+}
+
+void SklbFile::writeSklb(hkStringBuf filename) {
+    ofstream stream(filename, ios::binary);
+    if (stream.is_open()) {
+        writeFromVector(preHavok, stream, preHavokSize);
+        writeFromVector(havok, stream, havokSize);
+
+        stream.close();
+    }
+    else {
+        printf("Could not open stream %s\n", filename.cString());
+    }
+}
+
+void SklbFile::replaceHavok(hkStringBuf filename) {
+    havokSize = fileSize(filename);
+    ifstream stream(filename, ios::binary);
+    if (stream.is_open()) {
+        readIntoVector(havok, stream, havokSize);
 
         stream.close();
     }

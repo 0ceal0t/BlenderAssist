@@ -12,6 +12,7 @@ using namespace std;
 
 class SklbFile{
 private:
+    bool headerType2;
     vector<char> preHavok;
     vector<char> havok;
 
@@ -20,6 +21,8 @@ private:
 public:
     void read(hkStringBuf filename);
     void writeHavok(hkStringBuf filename);
+    void writeSklb(hkStringBuf filename);
+    void replaceHavok(hkStringBuf filename);
 };
 
 class PapFile{

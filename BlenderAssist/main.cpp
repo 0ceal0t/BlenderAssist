@@ -13,7 +13,7 @@
 #include <codecvt>
 
 #include "Common/Base/System/Init/PlatformInit.cxx"
-#include "pack.h"
+#include "pack_anim.h"
 #include "extract.h"
 
 static void HK_CALL errorReport(const char* msg, void* userContext) {
@@ -56,20 +56,22 @@ int main(int argc, const char** argv) {
     std::string operation(convert_from_wstring(nargv[1]).c_str());
 
     // blenderassist.exe pack anim_idx .bin sklb pap out.pap
-    if (operation.compare("pack") == 0) {
+    if (operation.compare("pack_anim") == 0) {
         hkStringBuf anim_idx; // animation index
         hkStringBuf bin_in; // .bin from blender
         hkStringBuf skl_in; // original skeleton
         hkStringBuf anim_in; // original animation
         hkStringBuf anim_out; // pap animation out
+        hkStringBuf check_if_bound;
 
         anim_idx = convert_from_wstring(nargv[2]).c_str();
         bin_in = convert_from_wstring(nargv[3]).c_str();
         skl_in = convert_from_wstring(nargv[4]).c_str();
         anim_in = convert_from_wstring(nargv[5]).c_str();
         anim_out = convert_from_wstring(nargv[6]).c_str();
+        check_if_bound = convert_from_wstring(nargv[7]).c_str();
 
-        return pack(anim_idx, bin_in, skl_in, anim_in, anim_out);
+        return pack_anim(anim_idx, bin_in, skl_in, anim_in, anim_out, check_if_bound);
     }
     else if (operation.compare("extract") == 0) {
         hkStringBuf skl_in_sklb;
