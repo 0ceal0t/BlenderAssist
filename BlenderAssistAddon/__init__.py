@@ -2,7 +2,7 @@ bl_info = {
 	"name" : "BlenderAssist",
 	"author" : "ocealot",
 	"description" : "Export custom animations for FFXIV",
-	"version": (1, 3, 0),
+	"version": (1, 3, 1),
 	"blender" : (2, 80, 0),
 	"location" : "3D View > Tools (Right Side) > BlenderAssist",
 	"warning" : "",

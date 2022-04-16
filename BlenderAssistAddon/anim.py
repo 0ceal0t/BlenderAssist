@@ -10,9 +10,6 @@ def export(startFrame, endFrame, out_bin_file):
     numOriginalFrames = endFrame - startFrame
     duration = float(numOriginalFrames - 1) * 0.0333333333333333
 
-    print("numFrames " + str(numOriginalFrames))
-    print("duration " + str(duration))
-
     tracks = {}
     for bone in arm_ob.data.bones:
         excluded = False
@@ -27,8 +24,10 @@ def export(startFrame, endFrame, out_bin_file):
                 
         tracks[bone.name] = []
 
+    need_to_add_n_root = "n_root" not in tracks
+    tracks["n_root"] = []
+
     numTracks = len(tracks)
-    print("numTracks " + str(numTracks))
 
     current_frame = 0
     for current_frame in range(numOriginalFrames + 1):
@@ -52,13 +51,15 @@ def export(startFrame, endFrame, out_bin_file):
             t.scale = scale
             tracks[pose_bone.name].append(t)
 
+        if need_to_add_n_root:
+            tracks["n_root"].append(helper.Transform())
+
     with open(out_bin_file, 'wb') as file:
         helper.write_int(file, numOriginalFrames)
         helper.write_int(file, numTracks)
         helper.write_float(file, duration)
         
         for track_name in tracks:
-            print("Blender bone : " + track_name)
             helper.write_cstring(file, track_name)
             
         for current_frame in range(numOriginalFrames + 1):

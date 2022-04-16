@@ -63,7 +63,7 @@ class BlenderAssistProperties(PropertyGroup):
         min = 0
     )
     check_original_bound: BoolProperty(
-        name = "Only animate same bones as original animation (do not check for custom skeletons)",
+        name = "Only animate same bones as original animation",
         default = False
     )
 

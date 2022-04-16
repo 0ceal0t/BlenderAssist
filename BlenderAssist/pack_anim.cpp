@@ -33,30 +33,31 @@ void read(hkRefPtr<hkaInterleavedUncompressedAnimation> anim, hkRefPtr<hkaAnimat
 
     // Which ones are actually in the skeleton
 
-    std::vector<std::string> validTrackNames;
-    std::vector<bool> isTrackValid;
-
+    std::vector<int> validTrackIndex;
     for(int trackIdx = 0; trackIdx < numAllTransforms; trackIdx++) {
-        auto trackName = allTrackNames[trackIdx];
-        auto boneIdx = getBoneIdx(trackName, skl);
+        validTrackIndex.push_back(-1); // all not valid for now
+    }
 
-        if (boneIdx == -1) {
-            isTrackValid.push_back(false);
-        }
-        else {
-            if(!checkIfOriginalBound || getBound(boneIdx, binding)) { // if we don't care, or it was originally bound
-                validTrackNames.push_back(trackName);
-                isTrackValid.push_back(true);
-            }
-            else {
-                isTrackValid.push_back(false);
+    printf("Check if bound: %d\n", checkIfOriginalBound);
+
+    int numTransforms = 0; // number of valid transforms
+
+    for(int boneIdx = 0; boneIdx < skl->m_bones.getSize(); boneIdx++) {
+        if (checkIfOriginalBound && !getBound(boneIdx, binding)) { continue; } // this bone was never bound
+        auto boneName = skl->m_bones[boneIdx].m_name;
+
+        for(int trackIdx = 0; trackIdx < numAllTransforms; trackIdx++) {
+            auto trackName = allTrackNames[trackIdx];
+
+            if (trackName.compare(boneName.cString()) == 0) {
+                validTrackIndex[trackIdx] = numTransforms;
+                numTransforms++;
+                break;
             }
         }
     }
 
     // Set up tracks
-
-    int numTransforms = validTrackNames.size();
 
     printf("Number of original frames %d\n", numOriginalFrames);
     printf("Number of tracks %d (%d)\n", numTransforms, numAllTransforms);
@@ -64,7 +65,7 @@ void read(hkRefPtr<hkaInterleavedUncompressedAnimation> anim, hkRefPtr<hkaAnimat
 
     anim->m_duration = duration;
     anim->m_annotationTracks.clear();
-    anim->m_annotationTracks.setSize(numTransforms);
+    anim->m_annotationTracks.setSize(0); //anim->m_annotationTracks.setSize(numTransforms);
     anim->m_numberOfFloatTracks = 0;
     anim->m_numberOfTransformTracks = numTransforms;
     anim->m_floats.setSize(0);
@@ -75,12 +76,12 @@ void read(hkRefPtr<hkaInterleavedUncompressedAnimation> anim, hkRefPtr<hkaAnimat
     binding->m_transformTrackToBoneIndices.clear();
     binding->m_transformTrackToBoneIndices.setSize(numTransforms);
 
-    for(int trackIdx = 0; trackIdx < numTransforms; trackIdx++) {
-        auto trackName = validTrackNames[trackIdx];
+    for(int trackIdx = 0; trackIdx < numAllTransforms; trackIdx++) {
+        auto idx = validTrackIndex[trackIdx];
+        if (idx == -1) continue;
+        auto trackName = allTrackNames[trackIdx];
         auto boneIdx = getBoneIdx(trackName, skl);
-        binding->m_transformTrackToBoneIndices[trackIdx] = boneIdx;
-        printf("Bone %s (%d)\n", trackName.c_str(), boneIdx);
-        anim->m_annotationTracks[trackIdx].m_trackName = trackName.c_str();
+        binding->m_transformTrackToBoneIndices[idx] = boneIdx;
     }
 
     // Read frames
@@ -88,19 +89,16 @@ void read(hkRefPtr<hkaInterleavedUncompressedAnimation> anim, hkRefPtr<hkaAnimat
     for(int frameIdx = 0; frameIdx < numOriginalFrames; frameIdx++) {
         int offTransforms = frameIdx * numTransforms;
 
-        int validTrackIdx = 0;
         for(int trackIdx = 0; trackIdx < numAllTransforms; trackIdx++) {
-            auto valid = isTrackValid[trackIdx];
+            auto idx = validTrackIndex[trackIdx];
 
-            if (valid) {
-                read(stream, anim->m_transforms[validTrackIdx + offTransforms]);
-            }
-            else { // still need to read, just don't do anything with the data
+            if(idx == -1) {
                 hkQsTransformf dummyT;
                 read(stream, dummyT);
             }
-
-            if (valid) validTrackIdx++;
+            else {
+                read(stream, anim->m_transforms[idx + offTransforms]);
+            }
         }
     }
 }
@@ -142,6 +140,8 @@ int packHavok(const hkStringBuf anim_idx_str, const hkStringBuf bin_in, const hk
     auto final_anim = new hkaSplineCompressedAnimation( *storeAnim.val(), tparams, aparams );
     binding->m_animation = final_anim;
     anim_container->m_animations[anim_idx] = final_anim;
+
+    auto anim = hkRefPtr<hkaAnimation>(anim_ptr);
 
     // ========================
 
