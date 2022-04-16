@@ -38,7 +38,7 @@ void read(hkRefPtr<hkaInterleavedUncompressedAnimation> anim, hkRefPtr<hkaAnimat
         validTrackIndex.push_back(-1); // all not valid for now
     }
 
-    printf("Check if bound: %d\n", checkIfOriginalBound);
+    printf("Check if bound %d\n", checkIfOriginalBound);
 
     int numTransforms = 0; // number of valid transforms
 
@@ -59,9 +59,8 @@ void read(hkRefPtr<hkaInterleavedUncompressedAnimation> anim, hkRefPtr<hkaAnimat
 
     // Set up tracks
 
-    printf("Number of original frames %d\n", numOriginalFrames);
+    printf("Number of frames %d\n", numOriginalFrames);
     printf("Number of tracks %d (%d)\n", numTransforms, numAllTransforms);
-    printf("Original number of tracks %d\n", binding->m_transformTrackToBoneIndices.getSize());
 
     anim->m_duration = duration;
     anim->m_annotationTracks.clear();
@@ -125,6 +124,10 @@ int packHavok(const hkStringBuf anim_idx_str, const hkStringBuf bin_in, const hk
     auto anim_ptr = anim_container->m_animations[anim_idx];
     auto binding_ptr = anim_container->m_bindings[anim_idx];
     auto binding = hkRefPtr<hkaAnimationBinding>(binding_ptr);
+
+    printf("Original number of tracks %d\n", binding->m_transformTrackToBoneIndices.getSize());
+    printf("Original number of frames %d\n", anim_ptr->getNumOriginalFrames());
+    printf("Original duration %f\n", anim_ptr->m_duration);
 
     // ========================
 

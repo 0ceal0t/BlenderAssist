@@ -3,12 +3,15 @@
 An add-on to import FFXIV animations into Blender and export custom ones for use in-game. Based on [AnimAssist](https://github.com/lmcintyre/AnimAssist), but much more scuffed.
 
 ## Requirements
+
 - [VC++2012 32-bit Redist](https://www.microsoft.com/en-us/download/details.aspx?id=30679#) (`VSU_4\vcredist_x86.exe`)
 - [Blender](https://www.blender.org/)
 - A way to replace an existing `.pap` files like Textools, Penumbra, or VFXEditor 
 
 ## Installation
 Download the addon from the [releases](https://github.com/0ceal0t/BlenderAssist/releases). Go to `Edit > Preferences > Add-ons`, press "Install" and select the entire `.zip` file. Make sure to enable the add-on as well.
+
+> Note on updating: you may need to uninstall the add-on, restart Blender, and then re-install it
 
 ![image](https://user-images.githubusercontent.com/18051158/162598790-56386e08-6182-4691-90b3-ebfc0f88cf9f.png)
 
@@ -33,6 +36,7 @@ And import the outputed `.pap` using your modding tool of choice.
 https://user-images.githubusercontent.com/18051158/162326495-ab9ba1c2-fc88-4068-a53d-bf8dd50c83e2.mp4
 
 ## Porting Animations
+
 When importing animations from MMD, other games, etc. it's generally a good idea to use a [bone remapping tool](https://github.com/Mwni/blender-animation-retargeting). A small caveat for this specific ones is that it will not work unless just adjust the "Rest alignment" of one of the bones you have mapped. For example, my mapping is:
 
 ![image](https://user-images.githubusercontent.com/18051158/162326747-87837006-276d-4436-ba15-6abe2b23652f.png)
@@ -42,6 +46,7 @@ So when setting the "Rest alignment", I just wiggled `n_hara` slightly. Also mak
 ![image](https://user-images.githubusercontent.com/18051158/162326875-74f1c72d-999c-4cd8-a882-4d382ec65c92.png)
 
 ## TMB and PAP Files
+
 There are parameters in both the `.pap` and `.tmb` files which determine how long an animation is allowed to play, so you may need to adjust them. In addition `.tmb` files often have facial expressions which you may want to remove or adjust using [VFXEditor](https://github.com/0ceal0t/Dalamud-VFXEditor)
 
 ## Notes on Building
