@@ -64,6 +64,7 @@ int main(int argc, const char** argv) {
         hkStringBuf anim_in; // original animation
         hkStringBuf anim_out; // pap animation out
         hkStringBuf check_if_bound;
+        hkStringBuf compress_anim;
 
         anim_idx = convert_from_wstring(nargv[2]).c_str();
         bin_in = convert_from_wstring(nargv[3]).c_str();
@@ -71,8 +72,9 @@ int main(int argc, const char** argv) {
         anim_in = convert_from_wstring(nargv[5]).c_str();
         anim_out = convert_from_wstring(nargv[6]).c_str();
         check_if_bound = convert_from_wstring(nargv[7]).c_str();
+        compress_anim = convert_from_wstring(nargv[8]).c_str();
 
-        return pack_anim(anim_idx, bin_in, skl_in, anim_in, anim_out, check_if_bound);
+        return pack_anim(anim_idx, bin_in, skl_in, anim_in, anim_out, check_if_bound, compress_anim);
     }
     else if (operation.compare("pack_skel") == 0) {
         hkStringBuf bin_in;

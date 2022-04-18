@@ -102,9 +102,10 @@ void read(hkRefPtr<hkaInterleavedUncompressedAnimation> anim, hkRefPtr<hkaAnimat
     }
 }
 
-int packHavok(const hkStringBuf anim_idx_str, const hkStringBuf bin_in, const hkStringBuf skl_in, const hkStringBuf anim_in, const hkStringBuf anim_out, const hkStringBuf check_if_bound_str) {
+int packHavok(const hkStringBuf anim_idx_str, const hkStringBuf bin_in, const hkStringBuf skl_in, const hkStringBuf anim_in, const hkStringBuf anim_out, const hkStringBuf check_if_bound_str, const hkStringBuf compress_anim_str) {
     int anim_idx = std::stoi(anim_idx_str.cString());
     bool checkIfOriginalBound = std::stoi(check_if_bound_str.cString()) == 1;
+    bool compress_anim = std::stoi(compress_anim_str.cString()) == 1;
 
     hkRootLevelContainer* skl_root_container;
     hkRootLevelContainer* anim_root_container;
@@ -133,18 +134,23 @@ int packHavok(const hkStringBuf anim_idx_str, const hkStringBuf bin_in, const hk
 
     hkRefPtr<hkaInterleavedUncompressedAnimation> storeAnim = new hkaInterleavedUncompressedAnimation();
 
-    hkaSplineCompressedAnimation::TrackCompressionParams tparams;
-    hkaSplineCompressedAnimation::AnimationCompressionParams aparams;
-    //tparams.m_rotationTolerance = 0.001f;
-    //tparams.m_rotationQuantizationType = hkaSplineCompressedAnimation::TrackCompressionParams::THREECOMP40;
-
     read(storeAnim, binding, skl, stream, checkIfOriginalBound);
 
-    auto final_anim = new hkaSplineCompressedAnimation( *storeAnim.val(), tparams, aparams );
-    binding->m_animation = final_anim;
-    anim_container->m_animations[anim_idx] = final_anim;
+    printf("Compress animation %d\n", compress_anim);
 
-    auto anim = hkRefPtr<hkaAnimation>(anim_ptr);
+    if (compress_anim) {
+        hkaSplineCompressedAnimation::TrackCompressionParams tparams;
+        hkaSplineCompressedAnimation::AnimationCompressionParams aparams;
+        //tparams.m_rotationTolerance = 0.001f;
+        //tparams.m_rotationQuantizationType = hkaSplineCompressedAnimation::TrackCompressionParams::THREECOMP40;
+        auto final_anim = new hkaSplineCompressedAnimation( *storeAnim.val(), tparams, aparams );
+        binding->m_animation = final_anim;
+        anim_container->m_animations[anim_idx] = final_anim;
+    }
+    else {
+        binding->m_animation = storeAnim;
+        anim_container->m_animations[anim_idx] = storeAnim;
+    }
 
     // ========================
 
@@ -157,7 +163,7 @@ int packHavok(const hkStringBuf anim_idx_str, const hkStringBuf bin_in, const hk
     }
 }
 
-int pack_anim(const hkStringBuf anim_idx_str, const hkStringBuf bin_in, const hkStringBuf skl_in_sklb, const hkStringBuf anim_in_pap, const hkStringBuf anim_out_pap, const hkStringBuf check_if_bound_str) {
+int pack_anim(const hkStringBuf anim_idx_str, const hkStringBuf bin_in, const hkStringBuf skl_in_sklb, const hkStringBuf anim_in_pap, const hkStringBuf anim_out_pap, const hkStringBuf check_if_bound_str, const hkStringBuf compress_anim_str) {
     PapFile papFile;
     papFile.read(anim_in_pap);
 
@@ -173,7 +179,7 @@ int pack_anim(const hkStringBuf anim_idx_str, const hkStringBuf bin_in, const hk
     sklbFile.writeHavok(original_skl_temp);
 
     auto new_anim_temp = concat(baseDir, "new_anim_temp.hkx");
-    auto res = packHavok(anim_idx_str, bin_in, original_skl_temp, original_anim_temp, new_anim_temp, check_if_bound_str);
+    auto res = packHavok(anim_idx_str, bin_in, original_skl_temp, original_anim_temp, new_anim_temp, check_if_bound_str, compress_anim_str);
 
     papFile.replaceHavok(new_anim_temp);
     papFile.writePap(anim_out_pap);

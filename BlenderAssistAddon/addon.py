@@ -66,6 +66,10 @@ class BlenderAssistProperties(PropertyGroup):
         name = "Only animate same bones as original animation",
         default = False
     )
+    compress_anim: BoolProperty(
+        name = "Compress animation data",
+        default = True
+    )
 
     exclude_bones: CollectionProperty(type=data.ExcludeBone)
     editing_exclude_bones: BoolProperty(default=False)
@@ -165,9 +169,14 @@ class BlenderAssistExportAnim(Operator):
         anim_in = state.input_pap
         skl_in = state.input_sklb
         anim_idx = str(state.anim_idx)
+
         check_original_bound = "0"
         if state.check_original_bound:
             check_original_bound = "1"
+
+        compress_anim = "0"
+        if state.compress_anim:
+            compress_anim = "1"
 
         dirname = os.path.dirname(os.path.abspath(__file__))
         
@@ -185,7 +194,8 @@ class BlenderAssistExportAnim(Operator):
         print("Finished exporting to bin")
         command = dirname + '/bin/blenderassist.exe'
         print(command + " " + str(anim_idx) + " " + anim_bin_file + " " + skl_in + " " + anim_in + " -> " + output_pap)
-        subprocess.run([command, 'pack_anim', str(anim_idx), anim_bin_file, skl_in, anim_in, output_pap, check_original_bound])
+        print(check_original_bound, compress_anim)
+        subprocess.run([command, 'pack_anim', str(anim_idx), anim_bin_file, skl_in, anim_in, output_pap, check_original_bound, compress_anim])
 
         return {'FINISHED'}
         
@@ -226,6 +236,8 @@ class BlenderAssistPanelExportAnim(bpy.types.Panel):
                 layout.prop(state, "anim_idx")
 
                 layout.prop(state, "check_original_bound")
+
+                layout.prop(state, "compress_anim")
 
                 layout.label(text="Skeleton SKLB")
                 col = layout.column(align=True)
