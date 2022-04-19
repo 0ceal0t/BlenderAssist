@@ -29,7 +29,7 @@ Once you have an animation you want to export, select the armature and open the 
 
 Configure the parameters to your liking, **making sure to select the original .pap and .sklb files**. Make sure the animation index also matches that of the animation you want to replace. Most `.pap` files only have a single animation, so leaving it at `0` is fine, but make sure to double-check.
 
-![image](https://user-images.githubusercontent.com/18051158/162598885-6a85dc66-ac38-4f3b-8501-ab7abc2f5ed3.png)
+![image](https://user-images.githubusercontent.com/18051158/164119440-961a48fc-d1dd-44f6-be33-561dd30bfb3a.png)
 
 And import the outputed `.pap` using your modding tool of choice.
 
